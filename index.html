@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบฐานข้อมูลการฝึกงาน — วิทยาลัยชุมชนยะลา</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --primary:      #0a2463;
+      --primary-mid:  #1e4db7;
+      --accent:       #3a86ff;
+      --accent-light: #60a5fa;
+      --gold:         #f59e0b;
+      --success:      #10b981;
+      --warning:      #f59e0b;
+      --danger:       #ef4444;
+      --info:         #06b6d4;
+      --bg:           #f0f4ff;
+      --card:         #ffffff;
+      --sidebar-w:    260px;
+      --text-main:    #1e293b;
+      --text-muted:   #64748b;
+      --border:       #e2e8f0;
+      --shadow-sm:    0 1px 3px rgba(10,36,99,.08);
+      --shadow-md:    0 4px 16px rgba(10,36,99,.12);
+      --shadow-lg:    0 12px 40px rgba(10,36,99,.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* ─── SCROLLBAR ─────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 99px; }
+
+    /* ══════════════════════════════════
+       LOGIN PAGE
+    ══════════════════════════════════ */
+    #loginPage {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-mid) 50%, var(--accent) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #loginPage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle at 20% 80%, rgba(255,255,255,.06) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255,255,255,.04) 0%, transparent 40%);
+    }
+
+    /* floating circles decoration */
+    .login-deco { position: absolute; border-radius: 50%; opacity: .07; background: #fff; }
+    .login-deco.c1 { width: 400px; height: 400px; top: -120px; right: -80px; }
+    .login-deco.c2 { width: 250px; height: 250px; bottom: -60px; left: -60px; }
+    .login-deco.c3 { width: 140px; height: 140px; top: 50%; left: 10%; }
+
+    .login-card {
+      background: rgba(255,255,255,.97);
+      border-radius: 24px;
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      z-index: 1;
+      animation: slideUp .6s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-logo {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(58,134,255,.35);
+    }
+    .login-logo i { font-size: 32px; color: #fff; }
+
+    .login-card h2 {
+      font-family: 'Prompt', sans-serif;
+      font-size: 1.4rem; font-weight: 700;
+      color: var(--primary);
+      text-align: center;
+    }
+    .login-card p.subtitle { text-align: center; color: var(--text-muted); font-size: .9rem; margin-bottom: 32px; }
+
+    .form-label { font-weight: 600; font-size: .85rem; color: var(--text-main); margin-bottom: 6px; }
+
+    .form-control-custom {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: .95rem;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      background: #f8faff;
+    }
+    .form-control-custom:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(58,134,255,.15);
+      background: #fff;
+    }
+
+    .input-icon-wrap { position: relative; }
+    .input-icon-wrap i {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: .9rem;
+    }
+    .input-icon-wrap .form-control-custom { padding-left: 40px; }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--primary-mid), var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 4px 16px rgba(30,77,183,.4);
+      margin-top: 8px;
+    }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(30,77,183,.5); }
+    .btn-login:active { transform: translateY(0); }
+
+    .login-hint {
+      margin-top: 20px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: .82rem;
+      color: var(--primary-mid);
+    }
+    .login-hint strong { display: block; margin-bottom: 4px; }
+
+    .login-error {
+      background: #fef2f2; border: 1px solid #fecaca;
+      border-radius: 10px; padding: 10px 14px;
+      color: #dc2626; font-size: .85rem; display: none;
+    }
+
+    /* ══════════════════════════════════
+       MAIN LAYOUT
+    ══════════════════════════════════ */
+    #mainApp { display: none; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0;
+      width: var(--sidebar-w);
+      background: linear-gradient(180deg, var(--primary) 0%, #0d3380 100%);
+      display: flex; flex-direction: column;
+      z-index: 200;
+      transition: transform .3s cubic-bezier(.22,1,.36,1);
+      box-shadow: 4px 0 20px rgba(10,36,99,.25);
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .sidebar-brand .brand-icon {
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,.15);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px;
+    }
+    .sidebar-brand h1 {
+      font-family: 'Prompt', sans-serif;
+      font-size: .95rem; font-weight: 700; color: #fff;
+      line-height: 1.3;
+    }
+    .sidebar-brand span { font-size: .75rem; color: rgba(255,255,255,.55); }
+
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+
+    .nav-section-label {
+      font-size: .7rem; font-weight: 700; letter-spacing: .08em;
+      color: rgba(255,255,255,.4);
+      text-transform: uppercase; padding: 16px 8px 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      color: rgba(255,255,255,.72);
+      font-size: .9rem; font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      margin-bottom: 2px;
+    }
+    .nav-item i { width: 18px; text-align: center; font-size: .9rem; }
+    .nav-item:hover { background: rgba(255,255,255,.1); color: #fff; }
+    .nav-item.active { background: rgba(58,134,255,.3); color: #fff; }
+    .nav-item.active i { color: var(--accent-light); }
+
+    .sidebar-footer {
+      padding: 16px 12px 20px;
+      border-top: 1px solid rgba(255,255,255,.1);
+    }
+    .user-info {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      background: rgba(255,255,255,.08); margin-bottom: 10px;
+    }
+    .user-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; color: #fff; font-weight: 700; flex-shrink: 0;
+    }
+    .user-info .name { font-size: .82rem; color: #fff; font-weight: 600; }
+    .user-info .role { font-size: .72rem; color: rgba(255,255,255,.5); }
+
+    .btn-logout {
+      width: 100%;
+      padding: 10px;
+      background: rgba(239,68,68,.15);
+      border: 1px solid rgba(239,68,68,.3);
+      color: #fca5a5;
+      border-radius: 10px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: .85rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,.3); color: #fff; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: fixed;
+      left: var(--sidebar-w); right: 0; top: 0; height: 64px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 28px;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+      transition: left .3s;
+    }
+
+    .topbar-title {
+      font-family: 'Prompt', sans-serif;
+      font-size: 1.05rem; font-weight: 600;
+      color: var(--primary);
+    }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 14px;
+    }
+
+    .topbar-badge {
+      background: linear-gradient(135deg, var(--primary-mid), var(--accent));
+      color: #fff;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    #hamburger {
+      display: none;
+      background: none; border: none;
+      color: var(--primary); font-size: 1.3rem; cursor: pointer; padding: 4px;
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      margin-left: var(--sidebar-w);
+      padding-top: 64px;
+      min-height: 100vh;
+      transition: margin-left .3s;
+    }
+
+    .page { display: none; padding: 28px; animation: fadeIn .35s ease both; }
+    .page.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .page-header h2 {
+      font-family: 'Prompt', sans-serif;
+      font-size: 1.4rem; font-weight: 700; color: var(--primary);
+    }
+    .page-header p { font-size: .85rem; color: var(--text-muted); }
+
+    /* ── STAT CARDS ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 22px 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 16px;
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .stat-card.blue::after  { background: linear-gradient(90deg, var(--primary-mid), var(--accent)); }
+    .stat-card.green::after { background: linear-gradient(90deg, #059669, var(--success)); }
+    .stat-card.gold::after  { background: linear-gradient(90deg, #d97706, var(--gold)); }
+    .stat-card.cyan::after  { background: linear-gradient(90deg, #0891b2, var(--info)); }
+
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+    .stat-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; flex-shrink: 0;
+    }
+    .stat-icon.blue  { background: #eff6ff; color: var(--primary-mid); }
+    .stat-icon.green { background: #ecfdf5; color: var(--success); }
+    .stat-icon.gold  { background: #fffbeb; color: var(--gold); }
+    .stat-icon.cyan  { background: #ecfeff; color: var(--info); }
+
+    .stat-value {
+      font-family: 'Prompt', sans-serif;
+      font-size: 2rem; font-weight: 700; color: var(--primary); line-height: 1;
+    }
+    .stat-label { font-size: .82rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── CARDS ── */
+    .card-box {
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .card-header-custom {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .card-header-custom h3 {
+      font-family: 'Prompt', sans-serif;
+      font-size: 1rem; font-weight: 600; color: var(--primary);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-header-custom h3 i { color: var(--accent); }
+
+    .card-body-custom { padding: 22px; }
+
+    /* ── SEARCH BAR ── */
+    .search-wrap {
+      position: relative; max-width: 320px;
+    }
+    .search-wrap i {
+      position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%); color: var(--text-muted);
+    }
+    .search-input {
+      padding: 9px 14px 9px 36px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: .9rem;
+      width: 100%; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      background: #f8faff;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(58,134,255,.12);
+      background: #fff;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-primary-custom {
+      padding: 9px 18px;
+      background: linear-gradient(135deg, var(--primary-mid), var(--accent));
+      color: #fff; border: none; border-radius: 10px;
+      font-family: 'Sarabun', sans-serif; font-size: .88rem; font-weight: 700;
+      cursor: pointer; transition: all .2s; display: inline-flex;
+      align-items: center; gap: 7px;
+      box-shadow: 0 2px 8px rgba(30,77,183,.3);
+    }
+    .btn-primary-custom:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30,77,183,.4); }
+
+    .btn-sm-icon {
+      width: 32px; height: 32px; border-radius: 8px; border: none;
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+      font-size: .8rem; transition: all .2s;
+    }
+    .btn-edit { background: #eff6ff; color: var(--primary-mid); }
+    .btn-edit:hover { background: var(--primary-mid); color: #fff; }
+    .btn-del  { background: #fef2f2; color: var(--danger); }
+    .btn-del:hover  { background: var(--danger); color: #fff; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+
+    table.data-table {
+      width: 100%; border-collapse: collapse;
+      font-size: .88rem;
+    }
+    .data-table thead th {
+      padding: 12px 14px;
+      background: #f8faff;
+      color: var(--primary); font-weight: 700;
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    .data-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .data-table tbody tr:hover { background: #f8fbff; }
+    .data-table tbody td {
+      padding: 12px 14px;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+    .data-table .id-cell { font-family: monospace; font-size: .8rem; color: var(--text-muted); }
+
+    /* ── STATUS BADGES ── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px;
+      font-size: .78rem; font-weight: 700; white-space: nowrap;
+    }
+    .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    .badge-active    { background: #d1fae5; color: #065f46; }
+    .badge-active::before { background: var(--success); }
+    .badge-pass      { background: #dbeafe; color: #1e40af; }
+    .badge-pass::before { background: var(--primary-mid); }
+    .badge-passplus  { background: #ede9fe; color: #5b21b6; }
+    .badge-passplus::before { background: #7c3aed; }
+    .badge-pending   { background: #fef9c3; color: #713f12; }
+    .badge-pending::before { background: var(--gold); }
+
+    /* ── CHART GRID ── */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 24px;
+    }
+    @media (max-width: 768px) { .chart-grid { grid-template-columns: 1fr; } }
+
+    .chart-box {
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .chart-box h3 {
+      font-family: 'Prompt', sans-serif;
+      font-size: .95rem; font-weight: 600; color: var(--primary);
+      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .chart-box h3 i { color: var(--accent); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,36,99,.55);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; opacity: 0; pointer-events: none;
+      transition: opacity .25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal-box {
+      background: var(--card);
+      border-radius: 20px;
+      width: 100%; max-width: 580px;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      transform: scale(.95) translateY(20px);
+      transition: transform .3s cubic-bezier(.22,1,.36,1);
+    }
+    .modal-overlay.open .modal-box { transform: scale(1) translateY(0); }
+
+    .modal-header {
+      padding: 22px 26px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 {
+      font-family: 'Prompt', sans-serif;
+      font-size: 1.05rem; font-weight: 700; color: var(--primary);
+      display: flex; align-items: center; gap: 9px;
+    }
+    .modal-header h3 i { color: var(--accent); }
+
+    .btn-close-modal {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #f1f5f9; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: .85rem;
+      transition: all .2s;
+    }
+    .btn-close-modal:hover { background: #fee2e2; color: var(--danger); }
+
+    .modal-body { padding: 22px 26px; }
+    .modal-footer {
+      padding: 16px 26px 22px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label-sm { font-size: .82rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; display: block; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .select-custom {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: .9rem; outline: none;
+      background: #f8faff;
+      transition: border-color .2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .select-custom:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(58,134,255,.12); background-color: #fff; }
+
+    .input-sm {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: .9rem; outline: none;
+      background: #f8faff;
+      transition: border-color .2s;
+    }
+    .input-sm:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(58,134,255,.12); background: #fff; }
+
+    .btn-cancel {
+      padding: 9px 20px;
+      background: #f1f5f9;
+      border: none; border-radius: 10px;
+      font-family: 'Sarabun', sans-serif; font-size: .88rem; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: all .2s;
+    }
+    .btn-cancel:hover { background: var(--border); }
+
+    .btn-save {
+      padding: 9px 22px;
+      background: linear-gradient(135deg, var(--primary-mid), var(--accent));
+      color: #fff; border: none; border-radius: 10px;
+      font-family: 'Sarabun', sans-serif; font-size: .88rem; font-weight: 700;
+      cursor: pointer; transition: all .2s;
+      box-shadow: 0 2px 8px rgba(30,77,183,.3);
+    }
+    .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30,77,183,.4); }
+
+    /* ── TOAST ── */
+    .toast-container {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .toast {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 8px 32px rgba(10,36,99,.2);
+      border-left: 4px solid;
+      min-width: 260px;
+      animation: toastIn .4s cubic-bezier(.22,1,.36,1) both,
+                 toastOut .3s .25s ease forwards;
+      --duration: 2.5s;
+      animation: toastIn .4s cubic-bezier(.22,1,.36,1) both;
+    }
+    .toast.success { border-color: var(--success); }
+    .toast.success i { color: var(--success); }
+    .toast.error { border-color: var(--danger); }
+    .toast.error i { color: var(--danger); }
+
+    .toast-msg { font-size: .88rem; font-weight: 600; color: var(--text-main); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      background: var(--primary);
+      color: rgba(255,255,255,.7);
+      text-align: center;
+      padding: 18px;
+      font-size: .82rem;
+      margin-top: 32px;
+    }
+    .site-footer strong { color: #fff; }
+
+    /* ── CONFIRM DIALOG ── */
+    .confirm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(10,36,99,.55);
+      backdrop-filter: blur(4px);
+      z-index: 600;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .confirm-overlay.open { opacity: 1; pointer-events: all; }
+    .confirm-box {
+      background: var(--card); border-radius: 18px;
+      padding: 32px 28px; max-width: 380px; width: 100%;
+      text-align: center;
+      transform: scale(.9); transition: transform .25s cubic-bezier(.22,1,.36,1);
+    }
+    .confirm-overlay.open .confirm-box { transform: scale(1); }
+    .confirm-icon {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: #fef2f2; display: flex; align-items: center;
+      justify-content: center; margin: 0 auto 16px;
+      font-size: 1.6rem; color: var(--danger);
+    }
+    .confirm-box h4 { font-family: 'Prompt', sans-serif; font-size: 1.1rem; color: var(--text-main); margin-bottom: 8px; }
+    .confirm-box p { font-size: .88rem; color: var(--text-muted); margin-bottom: 22px; }
+    .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+    .btn-confirm-del {
+      padding: 9px 24px;
+      background: var(--danger); color: #fff;
+      border: none; border-radius: 10px;
+      font-family: 'Sarabun', sans-serif; font-size: .88rem; font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 48px 20px; color: var(--text-muted);
+    }
+    .empty-state i { font-size: 3rem; color: var(--border); margin-bottom: 12px; display: block; }
+    .empty-state p { font-size: .9rem; }
+
+    /* ── FILTER TABS ── */
+    .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-tab {
+      padding: 6px 14px; border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: #f8faff; color: var(--text-muted);
+      font-family: 'Sarabun', sans-serif; font-size: .82rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+    }
+    .filter-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .filter-tab.active { background: var(--primary-mid); border-color: var(--primary-mid); color: #fff; }
+
+    /* ─ RESPONSIVE ──────────────── */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 0 0 0 9999px rgba(10,36,99,.45); }
+      .topbar { left: 0; }
+      .content { margin-left: 0; }
+      #hamburger { display: block; }
+      .page { padding: 18px; }
+      .form-row { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════
+     LOGIN PAGE
+════════════════════════════════ -->
+<div id="loginPage">
+  <div class="login-deco c1"></div>
+  <div class="login-deco c2"></div>
+  <div class="login-deco c3"></div>
+
+  <div class="login-card">
+    <div class="login-logo"><i class="fas fa-graduation-cap"></i></div>
+    <h2>ระบบฐานข้อมูลการฝึกงาน</h2>
+    <p class="subtitle">วิทยาลัยชุมชนยะลา — Yala Community College</p>
+
+    <div class="login-error" id="loginError">
+      <i class="fas fa-exclamation-circle"></i> ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px;">
+      <label class="form-label">ชื่อผู้ใช้</label>
+      <div class="input-icon-wrap">
+        <i class="fas fa-user"></i>
+        <input id="loginUser" class="form-control-custom" type="text" placeholder="กรอกชื่อผู้ใช้" />
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:20px;">
+      <label class="form-label">รหัสผ่าน</label>
+      <div class="input-icon-wrap">
+        <i class="fas fa-lock"></i>
+        <input id="loginPass" class="form-control-custom" type="password" placeholder="กรอกรหัสผ่าน" />
+      </div>
+    </div>
+
+    <button class="btn-login" onclick="doLogin()">
+      <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+    </button>
+
+    <div class="login-hint">
+      <strong><i class="fas fa-info-circle"></i> ข้อมูลสาธิต</strong>
+      ชื่อผู้ใช้: <code>admin</code> &nbsp;|&nbsp; รหัสผ่าน: <code>1234</code>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     MAIN APP
+════════════════════════════════ -->
+<div id="mainApp">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i class="fas fa-graduation-cap" style="color:#fff;font-size:1.2rem;"></i></div>
+      <h1>ระบบฝึกงาน</h1>
+      <span>Yala Community College</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">เมนูหลัก</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)">
+        <i class="fas fa-chart-pie"></i> Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('students',this)">
+        <i class="fas fa-users"></i> รายชื่อนักศึกษา
+      </div>
+      <div class="nav-item" onclick="showPage('add',this)">
+        <i class="fas fa-user-plus"></i> เพิ่มนักศึกษา
+      </div>
+      <div class="nav-section-label">รายงาน</div>
+      <div class="nav-item" onclick="showPage('report',this)">
+        <i class="fas fa-chart-bar"></i> รายงานสรุป
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">A</div>
+        <div>
+          <div class="name">ผู้ดูแลระบบ</div>
+          <div class="role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">
+        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+      </button>
+    </div>
+  </aside>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button id="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <div class="topbar-right">
+      <span class="topbar-badge"><i class="fas fa-circle-dot" style="font-size:.6rem;"></i> Live</span>
+      <span style="font-size:.82rem;color:var(--text-muted);" id="topbarDate"></span>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <h2><i class="fas fa-chart-pie" style="color:var(--accent);margin-right:8px;"></i>Dashboard</h2>
+          <p>ภาพรวมระบบฐานข้อมูลการฝึกงาน วิทยาลัยชุมชนยะลา</p>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stat-grid">
+        <div class="stat-card blue">
+          <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+          <div>
+            <div class="stat-value" id="st-total">0</div>
+            <div class="stat-label">นักศึกษาทั้งหมด</div>
+          </div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green"><i class="fas fa-briefcase"></i></div>
+          <div>
+            <div class="stat-value" id="st-active">0</div>
+            <div class="stat-label">กำลังฝึกงาน</div>
+          </div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-icon cyan"><i class="fas fa-check-double"></i></div>
+          <div>
+            <div class="stat-value" id="st-pass">0</div>
+            <div class="stat-label">ผ่านการประเมิน</div>
+          </div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon gold"><i class="fas fa-clock"></i></div>
+          <div>
+            <div class="stat-value" id="st-pending">0</div>
+            <div class="stat-label">รอประเมิน</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="chart-grid">
+        <div class="chart-box">
+          <h3><i class="fas fa-chart-doughnut"></i> สัดส่วนสถานะการฝึกงาน</h3>
+          <canvas id="chartDoughnut" height="200"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3><i class="fas fa-chart-bar"></i> จำนวนนักศึกษาตามสถานะ</h3>
+          <canvas id="chartBar" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Table -->
+      <div class="card-box" style="margin-top:24px;">
+        <div class="card-header-custom">
+          <h3><i class="fas fa-clock-rotate-left"></i> นักศึกษาล่าสุด 5 คน</h3>
+        </div>
+        <div class="card-body-custom table-wrap" style="padding:0;">
+          <table class="data-table" id="recentTable">
+            <thead>
+              <tr>
+                <th>#</th><th>รหัสนักศึกษา</th><th>ชื่อ-นามสกุล</th><th>บริษัท</th><th>สถานะ</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STUDENTS PAGE ── -->
+    <div class="page" id="page-students">
+      <div class="page-header">
+        <div>
+          <h2><i class="fas fa-users" style="color:var(--accent);margin-right:8px;"></i>รายชื่อนักศึกษา</h2>
+          <p>จัดการข้อมูลนักศึกษาที่ฝึกงานทั้งหมด</p>
+        </div>
+        <button class="btn-primary-custom" onclick="openAddModal()">
+          <i class="fas fa-user-plus"></i> เพิ่มนักศึกษา
+        </button>
+      </div>
+
+      <div class="card-box">
+        <div class="card-header-custom">
+          <h3><i class="fas fa-table"></i> ตารางข้อมูลนักศึกษา</h3>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div class="search-wrap">
+              <i class="fas fa-search"></i>
+              <input class="search-input" id="searchBox" type="text" placeholder="ค้นหาชื่อหรือรหัสนักศึกษา..." oninput="renderTable()" />
+            </div>
+          </div>
+        </div>
+        <div style="padding:14px 22px;border-bottom:1px solid var(--border);">
+          <div class="filter-tabs" id="filterTabs">
+            <button class="filter-tab active" onclick="setFilter('all',this)">ทั้งหมด</button>
+            <button class="filter-tab" onclick="setFilter('กำลังฝึกงาน',this)">กำลังฝึกงาน</button>
+            <button class="filter-tab" onclick="setFilter('ผ่านการประเมิน',this)">ผ่านการประเมิน</button>
+            <button class="filter-tab" onclick="setFilter('ผ่านการประเมิน+',this)">ผ่านการประเมิน+</button>
+            <button class="filter-tab" onclick="setFilter('รอประเมิน',this)">รอประเมิน</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="mainTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>รหัสนักศึกษา</th>
+                <th>ชื่อ-นามสกุล</th>
+                <th>สาขา</th>
+                <th>บริษัท</th>
+                <th>ผู้ดูแล</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="mainTableBody"></tbody>
+          </table>
+        </div>
+        <div style="padding:14px 22px;border-top:1px solid var(--border);font-size:.82rem;color:var(--text-muted);">
+          แสดง <span id="recordCount">0</span> รายการ
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADD PAGE ── -->
+    <div class="page" id="page-add">
+      <div class="page-header">
+        <div>
+          <h2><i class="fas fa-user-plus" style="color:var(--accent);margin-right:8px;"></i>เพิ่มนักศึกษา</h2>
+          <p>กรอกข้อมูลนักศึกษาใหม่เพื่อเพิ่มเข้าระบบ</p>
+        </div>
+      </div>
+      <div class="card-box">
+        <div class="card-header-custom">
+          <h3><i class="fas fa-id-card"></i> ข้อมูลนักศึกษา</h3>
+        </div>
+        <div class="card-body-custom">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label-sm">รหัสนักศึกษา *</label>
+              <input class="input-sm" id="add_id" type="text" placeholder="เช่น 6711016504027" />
+            </div>
+            <div class="form-group">
+              <label class="form-label-sm">ชื่อ-นามสกุล *</label>
+              <input class="input-sm" id="add_name" type="text" placeholder="เช่น นายสมชาย ใจดี" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label-sm">สาขาวิชา</label>
+              <input class="input-sm" id="add_major" type="text" placeholder="เช่น เทคโนโลยีสารสนเทศ" />
+            </div>
+            <div class="form-group">
+              <label class="form-label-sm">เบอร์โทรศัพท์</label>
+              <input class="input-sm" id="add_phone" type="text" placeholder="เช่น 08x-xxx-xxxx" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label-sm">อีเมล</label>
+            <input class="input-sm" id="add_email" type="email" placeholder="email@example.com" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label-sm">บริษัท/สถานประกอบการ *</label>
+              <input class="input-sm" id="add_company" type="text" placeholder="ชื่อบริษัท" />
+            </div>
+            <div class="form-group">
+              <label class="form-label-sm">ผู้ดูแล/อาจารย์นิเทศ</label>
+              <input class="input-sm" id="add_supervisor" type="text" placeholder="ชื่อผู้ดูแล" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label-sm">สถานะการฝึกงาน</label>
+            <select class="select-custom" id="add_status">
+              <option value="กำลังฝึกงาน">กำลังฝึกงาน</option>
+              <option value="รอประเมิน">รอประเมิน</option>
+              <option value="ผ่านการประเมิน">ผ่านการประเมิน</option>
+              <option value="ผ่านการประเมิน+">ผ่านการประเมิน+</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <button class="btn-primary-custom" onclick="addStudentFromPage()">
+              <i class="fas fa-save"></i> บันทึกข้อมูล
+            </button>
+            <button class="btn-cancel" onclick="clearAddForm()">
+              <i class="fas fa-undo"></i> ล้างข้อมูล
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REPORT PAGE ── -->
+    <div class="page" id="page-report">
+      <div class="page-header">
+        <div>
+          <h2><i class="fas fa-chart-bar" style="color:var(--accent);margin-right:8px;"></i>รายงานสรุป</h2>
+          <p>ข้อมูลสรุปสถิติการฝึกงานนักศึกษา</p>
+        </div>
+      </div>
+
+      <div class="stat-grid" style="margin-bottom:24px;">
+        <div class="stat-card blue">
+          <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+          <div><div class="stat-value" id="rpt-total">0</div><div class="stat-label">นักศึกษาทั้งหมด</div></div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green"><i class="fas fa-briefcase"></i></div>
+          <div><div class="stat-value" id="rpt-active">0</div><div class="stat-label">กำลังฝึกงาน</div></div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-icon cyan"><i class="fas fa-check-double"></i></div>
+          <div><div class="stat-value" id="rpt-pass">0</div><div class="stat-label">ผ่านการประเมิน</div></div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon gold"><i class="fas fa-star"></i></div>
+          <div><div class="stat-value" id="rpt-passplus">0</div><div class="stat-label">ผ่านการประเมิน+</div></div>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-box">
+          <h3><i class="fas fa-chart-pie"></i> สัดส่วนสถานะ</h3>
+          <canvas id="chartPie2" height="220"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3><i class="fas fa-building"></i> บริษัทยอดนิยม</h3>
+          <canvas id="chartCompany" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="card-box" style="margin-top:24px;">
+        <div class="card-header-custom">
+          <h3><i class="fas fa-list-check"></i> รายชื่อนักศึกษาทั้งหมด</h3>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="reportTable">
+            <thead>
+              <tr><th>#</th><th>รหัสนักศึกษา</th><th>ชื่อ-นามสกุล</th><th>บริษัท</th><th>สถานะ</th></tr>
+            </thead>
+            <tbody id="reportTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer" style="margin-left:var(--sidebar-w);" id="siteFooter">
+    © 2567 <strong>ระบบฐานข้อมูลการฝึกงาน</strong> — วิทยาลัยชุมชนยะลา &nbsp;|&nbsp;
+    จัดทำโดย <strong>สาขาเทคโนโลยีสารสนเทศ</strong>
+  </footer>
+
+</div><!-- end #mainApp -->
+
+<!-- ════════ MODAL: ADD / EDIT ════════ -->
+<div class="modal-overlay" id="studentModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modalTitle"><i class="fas fa-user-edit"></i> แก้ไขข้อมูลนักศึกษา</h3>
+      <button class="btn-close-modal" onclick="closeModal()"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="modal_key" />
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">รหัสนักศึกษา *</label>
+          <input class="input-sm" id="modal_id" type="text" placeholder="รหัสนักศึกษา" />
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">ชื่อ-นามสกุล *</label>
+          <input class="input-sm" id="modal_name" type="text" placeholder="ชื่อ-นามสกุล" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">สาขาวิชา</label>
+          <input class="input-sm" id="modal_major" type="text" />
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">เบอร์โทรศัพท์</label>
+          <input class="input-sm" id="modal_phone" type="text" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label-sm">อีเมล</label>
+        <input class="input-sm" id="modal_email" type="email" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">บริษัท/สถานประกอบการ *</label>
+          <input class="input-sm" id="modal_company" type="text" />
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">ผู้ดูแล</label>
+          <input class="input-sm" id="modal_supervisor" type="text" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label-sm">สถานะการฝึกงาน</label>
+        <select class="select-custom" id="modal_status">
+          <option value="กำลังฝึกงาน">กำลังฝึกงาน</option>
+          <option value="รอประเมิน">รอประเมิน</option>
+          <option value="ผ่านการประเมิน">ผ่านการประเมิน</option>
+          <option value="ผ่านการประเมิน+">ผ่านการประเมิน+</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn-save" onclick="saveModal()"><i class="fas fa-save"></i> บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ CONFIRM DELETE ════════ -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon"><i class="fas fa-trash-can"></i></div>
+    <h4>ลบข้อมูลนักศึกษา?</h4>
+    <p>การดำเนินการนี้ไม่สามารถย้อนกลับได้<br/>คุณต้องการลบข้อมูลนักศึกษาคนนี้หรือไม่?</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">ยกเลิก</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()"><i class="fas fa-trash-can"></i> ลบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════ -->
+<script>
+/* ─── INITIAL DATA ─────────────────── */
+const DEFAULT_STUDENTS = [
+  { id:'6711016504015', name:'นายสมชาย ใจดี',           major:'เทคโนโลยีสารสนเทศ', phone:'081-111-0001', email:'student01@yyc.ac.th', company:'บริษัท ABC Tech',        supervisor:'อ.ประสาน แก้ว',   status:'กำลังฝึกงาน'   },
+  { id:'6711016504016', name:'นางสาวพิชญา สุขใจ',        major:'บริหารธุรกิจ',      phone:'081-111-0002', email:'student02@yyc.ac.th', company:'บริษัท Smart Media',   supervisor:'อ.วิไล ทอง',     status:'ผ่านการประเมิน' },
+  { id:'6711016504017', name:'นายธีรภัทร มณี',           major:'เทคโนโลยีสารสนเทศ', phone:'081-111-0003', email:'student03@yyc.ac.th', company:'บริษัท Future Dev',    supervisor:'อ.ประสาน แก้ว',   status:'กำลังฝึกงาน'   },
+  { id:'6711016504018', name:'นางสาวกมลชนก พรหมมา',      major:'การบัญชี',          phone:'081-111-0004', email:'student04@yyc.ac.th', company:'บริษัท Next Solution', supervisor:'อ.สุรีย์ นาม',    status:'รอประเมิน'      },
+  { id:'6711016504019', name:'นายอาทิตย์ ศรีทอง',        major:'บริหารธุรกิจ',      phone:'081-111-0005', email:'student05@yyc.ac.th', company:'บริษัท Digital Plus',  supervisor:'อ.วิไล ทอง',     status:'ผ่านการประเมิน' },
+  { id:'6711016504020', name:'นางสาวชลธิชา แสงแก้ว',     major:'เทคโนโลยีสารสนเทศ', phone:'081-111-0006', email:'student06@yyc.ac.th', company:'บริษัท Creative Soft', supervisor:'อ.ประสาน แก้ว',   status:'กำลังฝึกงาน'   },
+  { id:'6711016504021', name:'นายณัฐวุฒิ คงดี',          major:'เทคโนโลยีสารสนเทศ', phone:'081-111-0007', email:'student07@yyc.ac.th', company:'บริษัท Innovation Hub',supervisor:'อ.สุชาติ ดำ',    status:'ผ่านการประเมิน+'},
+  { id:'6711016504022', name:'นายบีลาล โตะทา',           major:'เทคโนโลยีสารสนเทศ', phone:'081-111-0008', email:'student08@yyc.ac.th', company:'บริษัท Space X',       supervisor:'อ.สุชาติ ดำ',    status:'ผ่านการประเมิน+'},
+  { id:'6711016504023', name:'นายมูฮัมหมัดฮัมดี รามันเจะ',major:'เทคโนโลยีสารสนเทศ',phone:'081-111-0009', email:'student09@yyc.ac.th', company:'บริษัท Space X',       supervisor:'อ.สุชาติ ดำ',    status:'ผ่านการประเมิน+'},
+  { id:'6711016504024', name:'นายมารูวัน สาและ',          major:'บริหารธุรกิจ',      phone:'081-111-0010', email:'student10@yyc.ac.th', company:'บริษัท Chicken manU',  supervisor:'อ.วิไล ทอง',     status:'ผ่านการประเมิน+'},
+  { id:'6711016504025', name:'นางสาวนูรอาร์ณีซานต์ บาดง', major:'การบัญชี',          phone:'081-111-0011', email:'student11@yyc.ac.th', company:'บริษัท Chicken pop',   supervisor:'อ.สุรีย์ นาม',    status:'ผ่านการประเมิน+'},
+  { id:'6711016504026', name:'นางสาวพารีสา มะมิง',        major:'บริหารธุรกิจ',      phone:'081-111-0012', email:'student12@yyc.ac.th', company:'บริษัท Banana Boat',   supervisor:'อ.วิไล ทอง',     status:'ผ่านการประเมิน+'},
+];
+
+/* ─── STATE ─────────────────────── */
+let students = [];
+let currentFilter = 'all';
+let pendingDeleteKey = null;
+let editingKey = null;
+let chartDoughnut, chartBar, chartPie2, chartCompany;
+
+/* ─── INIT ──────────────────────── */
+function init() {
+  const saved = localStorage.getItem('yyc_students');
+  students = saved ? JSON.parse(saved) : [...DEFAULT_STUDENTS];
+  setDate();
+}
+
+function save() { localStorage.setItem('yyc_students', JSON.stringify(students)); }
+
+function setDate() {
+  const el = document.getElementById('topbarDate');
+  if(el) el.textContent = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+}
+
+/* ─── LOGIN ─────────────────────── */
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  const err = document.getElementById('loginError');
+  if(u === 'admin' && p === '1234') {
+    err.style.display='none';
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('mainApp').style.display='block';
+    refreshStats();
+    renderTable();
+    renderRecentTable();
+    renderReportTable();
+    initCharts();
+  } else {
+    err.style.display='flex'; err.style.gap='8px'; err.style.alignItems='center';
+  }
+}
+
+// Enter key login
+document.addEventListener('DOMContentLoaded',()=>{
+  ['loginUser','loginPass'].forEach(id=>{
+    document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+  });
+});
+
+function doLogout() {
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+
+/* ─── SIDEBAR ───────────────────── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.addEventListener('click', e=>{
+  const sb = document.getElementById('sidebar');
+  const hb = document.getElementById('hamburger');
+  if(sb.classList.contains('open') && !sb.contains(e.target) && !hb.contains(e.target)) {
+    sb.classList.remove('open');
+  }
+});
+
+/* ─── NAVIGATION ────────────────── */
+const pageTitles = { dashboard:'Dashboard', students:'รายชื่อนักศึกษา', add:'เพิ่มนักศึกษา', report:'รายงานสรุป' };
+
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = pageTitles[name]||name;
+  document.getElementById('sidebar').classList.remove('open');
+
+  if(name==='dashboard') { refreshStats(); renderRecentTable(); refreshCharts(); }
+  if(name==='students')  { renderTable(); }
+  if(name==='report')    { refreshReportStats(); renderReportTable(); refreshReportCharts(); }
+}
+
+/* ─── STATS ─────────────────────── */
+function getStats() {
+  const total   = students.length;
+  const active  = students.filter(s=>s.status==='กำลังฝึกงาน').length;
+  const pass    = students.filter(s=>s.status==='ผ่านการประเมิน').length;
+  const passPlus= students.filter(s=>s.status==='ผ่านการประเมิน+').length;
+  const pending = students.filter(s=>s.status==='รอประเมิน').length;
+  return { total, active, pass, passPlus, pending };
+}
+
+function refreshStats() {
+  const s = getStats();
+  setText('st-total', s.total);
+  setText('st-active', s.active);
+  setText('st-pass', s.pass + s.passPlus);
+  setText('st-pending', s.pending);
+}
+
+function refreshReportStats() {
+  const s = getStats();
+  setText('rpt-total', s.total);
+  setText('rpt-active', s.active);
+  setText('rpt-pass', s.pass);
+  setText('rpt-passplus', s.passPlus);
+}
+
+function setText(id, v) { const el=document.getElementById(id); if(el) el.textContent=v; }
+
+/* ─── TABLES ────────────────────── */
+function statusBadge(status) {
+  const map = {
+    'กำลังฝึกงาน': 'badge-active',
+    'ผ่านการประเมิน': 'badge-pass',
+    'ผ่านการประเมิน+': 'badge-passplus',
+    'รอประเมิน': 'badge-pending',
+  };
+  return `<span class="status-badge ${map[status]||'badge-pending'}">${status}</span>`;
+}
+
+function renderTable() {
+  const q = (document.getElementById('searchBox')||{value:''}).value.toLowerCase();
+  let list = students.filter(s=> {
+    const matchSearch = s.id.includes(q) || s.name.toLowerCase().includes(q);
+    const matchFilter = currentFilter==='all' || s.status===currentFilter;
+    return matchSearch && matchFilter;
+  });
+  const tbody = document.getElementById('mainTableBody');
+  if(!tbody) return;
+  if(!list.length) {
+    tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><i class="fas fa-search"></i><p>ไม่พบข้อมูลนักศึกษา</p></div></td></tr>`;
+    setText('recordCount',0); return;
+  }
+  tbody.innerHTML = list.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td class="id-cell">${s.id}</td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.major||'—'}</td>
+      <td>${s.company||'—'}</td>
+      <td>${s.supervisor||'—'}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-sm-icon btn-edit" onclick="openEditModal('${s.id}')" title="แก้ไข"><i class="fas fa-pen"></i></button>
+        <button class="btn-sm-icon btn-del"  onclick="askDelete('${s.id}')"     title="ลบ"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+  setText('recordCount', list.length);
+}
+
+function renderRecentTable() {
+  const list = [...students].slice(-5).reverse();
+  const tbody = document.querySelector('#recentTable tbody');
+  if(!tbody) return;
+  tbody.innerHTML = list.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td class="id-cell">${s.id}</td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.company}</td>
+      <td>${statusBadge(s.status)}</td>
+    </tr>`).join('');
+}
+
+function renderReportTable() {
+  const tbody = document.getElementById('reportTableBody');
+  if(!tbody) return;
+  tbody.innerHTML = students.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td class="id-cell">${s.id}</td>
+      <td>${s.name}</td>
+      <td>${s.company}</td>
+      <td>${statusBadge(s.status)}</td>
+    </tr>`).join('');
+}
+
+/* ─── FILTER ────────────────────── */
+function setFilter(val, el) {
+  currentFilter = val;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+/* ─── MODAL ─────────────────────── */
+function openAddModal() {
+  editingKey = null;
+  document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus"></i> เพิ่มนักศึกษาใหม่';
+  ['modal_key','modal_id','modal_name','modal_major','modal_phone','modal_email','modal_company','modal_supervisor'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('modal_status').value='กำลังฝึกงาน';
+  document.getElementById('studentModal').classList.add('open');
+}
+
+function openEditModal(studentId) {
+  const s = students.find(x=>x.id===studentId);
+  if(!s) return;
+  editingKey = studentId;
+  document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-edit"></i> แก้ไขข้อมูลนักศึกษา';
+  document.getElementById('modal_key').value       = s.id;
+  document.getElementById('modal_id').value        = s.id;
+  document.getElementById('modal_name').value      = s.name;
+  document.getElementById('modal_major').value     = s.major||'';
+  document.getElementById('modal_phone').value     = s.phone||'';
+  document.getElementById('modal_email').value     = s.email||'';
+  document.getElementById('modal_company').value   = s.company||'';
+  document.getElementById('modal_supervisor').value= s.supervisor||'';
+  document.getElementById('modal_status').value    = s.status;
+  document.getElementById('studentModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('studentModal').classList.remove('open'); }
+
+function saveModal() {
+  const id       = document.getElementById('modal_id').value.trim();
+  const name     = document.getElementById('modal_name').value.trim();
+  const company  = document.getElementById('modal_company').value.trim();
+  if(!id||!name||!company){ showToast('กรุณากรอกข้อมูลที่จำเป็น (รหัส, ชื่อ, บริษัท)','error'); return; }
+
+  const student = {
+    id, name,
+    major:      document.getElementById('modal_major').value.trim(),
+    phone:      document.getElementById('modal_phone').value.trim(),
+    email:      document.getElementById('modal_email').value.trim(),
+    company,
+    supervisor: document.getElementById('modal_supervisor').value.trim(),
+    status:     document.getElementById('modal_status').value,
+  };
+
+  if(editingKey) {
+    const idx = students.findIndex(s=>s.id===editingKey);
+    if(idx>-1) students[idx]=student;
+    showToast('บันทึกการแก้ไขสำเร็จ!','success');
+  } else {
+    if(students.find(s=>s.id===id)){ showToast('รหัสนักศึกษานี้มีอยู่แล้ว','error'); return; }
+    students.push(student);
+    showToast('เพิ่มนักศึกษาสำเร็จ!','success');
+  }
+  save(); closeModal(); renderTable(); renderRecentTable(); refreshStats();
+}
+
+/* ─── ADD FROM PAGE ─────────────── */
+function addStudentFromPage() {
+  const id      = document.getElementById('add_id').value.trim();
+  const name    = document.getElementById('add_name').value.trim();
+  const company = document.getElementById('add_company').value.trim();
+  if(!id||!name||!company){ showToast('กรุณากรอกข้อมูลที่จำเป็น (รหัส, ชื่อ, บริษัท)','error'); return; }
+  if(students.find(s=>s.id===id)){ showToast('รหัสนักศึกษานี้มีอยู่แล้ว','error'); return; }
+
+  students.push({
+    id, name,
+    major:      document.getElementById('add_major').value.trim(),
+    phone:      document.getElementById('add_phone').value.trim(),
+    email:      document.getElementById('add_email').value.trim(),
+    company,
+    supervisor: document.getElementById('add_supervisor').value.trim(),
+    status:     document.getElementById('add_status').value,
+  });
+  save(); clearAddForm();
+  showToast('เพิ่มนักศึกษาสำเร็จ!','success');
+  // Switch to students list
+  setTimeout(()=>{ document.querySelector('[onclick="showPage(\'students\',this)"]').click(); }, 800);
+}
+
+function clearAddForm() {
+  ['add_id','add_name','add_major','add_phone','add_email','add_company','add_supervisor'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('add_status').value='กำลังฝึกงาน';
+}
+
+/* ─── DELETE ────────────────────── */
+function askDelete(studentId) {
+  pendingDeleteKey = studentId;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm() {
+  pendingDeleteKey=null;
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
+function confirmDelete() {
+  if(!pendingDeleteKey) return;
+  students = students.filter(s=>s.id!==pendingDeleteKey);
+  save(); closeConfirm(); renderTable(); renderRecentTable(); refreshStats();
+  showToast('ลบข้อมูลสำเร็จ','success');
+}
+
+/* ─── CHARTS ────────────────────── */
+const COLORS = ['#1e4db7','#10b981','#7c3aed','#f59e0b'];
+const LABELS = ['กำลังฝึกงาน','ผ่านการประเมิน','ผ่านการประเมิน+','รอประเมิน'];
+
+function chartData() {
+  const s = getStats();
+  return [s.active, s.pass, s.passPlus, s.pending];
+}
+
+function initCharts() {
+  Chart.defaults.font.family = "'Sarabun', sans-serif";
+
+  const d = chartData();
+  chartDoughnut = new Chart(document.getElementById('chartDoughnut'), {
+    type:'doughnut',
+    data:{ labels:LABELS, datasets:[{ data:d, backgroundColor:COLORS, borderWidth:0, hoverOffset:6 }] },
+    options:{ plugins:{ legend:{ position:'bottom', labels:{ padding:16, font:{size:12} } } }, cutout:'65%' }
+  });
+
+  chartBar = new Chart(document.getElementById('chartBar'), {
+    type:'bar',
+    data:{ labels:LABELS, datasets:[{ label:'จำนวนนักศึกษา', data:d, backgroundColor:COLORS, borderRadius:8, borderWidth:0 }] },
+    options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1, font:{size:11} }, grid:{ color:'#e2e8f0' } }, x:{ grid:{ display:false }, ticks:{ font:{size:11} } } } }
+  });
+
+  chartPie2 = new Chart(document.getElementById('chartPie2'), {
+    type:'pie',
+    data:{ labels:LABELS, datasets:[{ data:d, backgroundColor:COLORS, borderWidth:2, borderColor:'#fff' }] },
+    options:{ plugins:{ legend:{ position:'bottom', labels:{ padding:14, font:{size:11} } } } }
+  });
+
+  // Company chart
+  const compMap = {};
+  students.forEach(s=>{ compMap[s.company]=(compMap[s.company]||0)+1; });
+  const sorted = Object.entries(compMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  chartCompany = new Chart(document.getElementById('chartCompany'), {
+    type:'bar',
+    data:{
+      labels: sorted.map(x=>x[0]),
+      datasets:[{ label:'จำนวน', data:sorted.map(x=>x[1]), backgroundColor:'#3a86ff', borderRadius:6, borderWidth:0 }]
+    },
+    options:{
+      indexAxis:'y',
+      plugins:{ legend:{ display:false } },
+      scales:{ x:{ beginAtZero:true, ticks:{ stepSize:1, font:{size:11} }, grid:{ color:'#e2e8f0' } }, y:{ grid:{ display:false }, ticks:{ font:{size:11} } } }
+    }
+  });
+}
+
+function refreshCharts() {
+  const d = chartData();
+  if(chartDoughnut){ chartDoughnut.data.datasets[0].data=d; chartDoughnut.update(); }
+  if(chartBar){ chartBar.data.datasets[0].data=d; chartBar.update(); }
+}
+
+function refreshReportCharts() {
+  const d = chartData();
+  if(chartPie2){ chartPie2.data.datasets[0].data=d; chartPie2.update(); }
+  if(chartCompany){
+    const compMap={};
+    students.forEach(s=>{ compMap[s.company]=(compMap[s.company]||0)+1; });
+    const sorted=Object.entries(compMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    chartCompany.data.labels=sorted.map(x=>x[0]);
+    chartCompany.data.datasets[0].data=sorted.map(x=>x[1]);
+    chartCompany.update();
+  }
+}
+
+/* ─── TOAST ─────────────────────── */
+function showToast(msg, type='success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas fa-${type==='success'?'circle-check':'circle-xmark'}"></i><span class="toast-msg">${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.transition='opacity .3s, transform .3s'; t.style.opacity='0'; t.style.transform='translateX(20px)'; setTimeout(()=>t.remove(),300); }, 2500);
+}
+
+/* ─── BOOT ──────────────────────── */
+init();
+</script>
+</body>
+</html>
